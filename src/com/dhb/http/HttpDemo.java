@@ -20,7 +20,6 @@ public class HttpDemo {
     public static void main(String[] args) throws Exception {
         //String response = HttpClientUtil.get("https://www.baidu.com?name=12");
         //http://192.168.0.106/ndhb/www/api.shtml?=DingHuo&action=goodsContent&val={"skey":"00796a2e531674257dbd2e7b585b2d85","goods_id":"60"}
-
         Map<String, Object> valMap = new HashMap<>();
         valMap.put("accounts_name", "13700000013");
         valMap.put("accounts_pass", "dhb168");
