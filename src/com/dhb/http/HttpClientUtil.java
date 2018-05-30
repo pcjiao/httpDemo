@@ -20,6 +20,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -159,6 +160,64 @@ public class HttpClientUtil {
             httpPost.setEntity(uefEntity);
             CloseableHttpResponse response = httpClient.execute(httpPost);
 
+            try {
+                if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+                    HttpEntity entity = response.getEntity();
+
+                    if (entity != null) {
+                        responseStr = EntityUtils.toString(entity, charSet);
+                    }
+                } else {
+                    log.info("状态码：" + response.getStatusLine().getStatusCode() + "，原因：" + response.getStatusLine().getReasonPhrase());
+                }
+            } finally {
+                response.close();
+            }
+        } catch (ClientProtocolException e) {
+            log.error("Http post request error", e);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Http post request error", e);
+        } catch (IOException e) {
+            log.error("Http post request error", e);
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                log.error("Httpclient close error", e);
+            }
+        }
+
+        return responseStr;
+    }
+
+    /**
+     * http提交post请求
+     *
+     * @param url     请求的地址
+     * @param json    json字符串
+     * @param charSet 字符集
+     * @return 响应结果(字符串)
+     * @throws Exception
+     */
+    public static String postJson(String url, String json, String charSet) throws Exception {
+        String responseStr = null;
+
+        //设置http的状态参数
+		/*RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(5000)
+                .setConnectTimeout(5000)
+                .setConnectionRequestTimeout(5000)
+                .build();*/
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+        //httpPost.setConfig(requestConfig);
+
+        try {
+            StringEntity uefEntity = new StringEntity(json, charSet);
+            uefEntity.setContentType("application/json");
+            httpPost.setEntity(uefEntity);
+            CloseableHttpResponse response = httpClient.execute(httpPost);
             try {
                 if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                     HttpEntity entity = response.getEntity();
